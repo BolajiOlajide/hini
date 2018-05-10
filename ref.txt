@@ -1,0 +1,18 @@
+https://get.slack.help/hc/en-us/articles/206329808-Google-Calendar-for-Slack
+
+https://api.slack.com/best-practices/the-small-stuff
+
+https://api.slack.com/dialogs
+
+https://api.slack.com/slash-commands
+
+https://api.slack.com/apps/AALMX0Z25/slash-commands?saved=1
+
+https://api.slack.com/tutorials/tags/python
+
+SLACK_APP = Proton Group
+
+https://api.slack.com/dialogs
+
+https://github.com/slackapi/python-dialog-example/blob/master/example.py
+
