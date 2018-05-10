@@ -1,1 +1,14 @@
+*.pyc
+__pycache_/
+.DS_Store
 .env
+ngrok
+
+*.egg-info
+
+build
+generated
+dist
+
+.tox
+.coverage
