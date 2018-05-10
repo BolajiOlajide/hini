@@ -16,3 +16,4 @@ https://api.slack.com/dialogs
 
 https://github.com/slackapi/python-dialog-example/blob/master/example.py
 
+https://developers.google.com/calendar/create-events
