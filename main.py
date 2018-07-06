@@ -26,14 +26,12 @@ slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 # Flask web server for incoming traffic from Slack
 app = Flask(__name__)
-db.init_app(app)
 
 # Define configuration settings for Hini app
 app.config.from_object(config[FLASK_ENV])
-print(app.config);
-print(FLASK_ENV, config[FLASK_ENV])
 
 # Instantiate the Manager from Flask Script
+db.init_app(app)
 manager = Manager(app)
 migrate = Migrate(app, db)
 
