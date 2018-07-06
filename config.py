@@ -25,6 +25,9 @@ class BaseConfig:
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     DEBUG = True
+    SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
 
 
 class DevelopmentConfig(BaseConfig):

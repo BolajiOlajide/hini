@@ -1,14 +1,15 @@
 import os
 import json
-from random import randint
 
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response, jsonify
 from slackclient import SlackClient
 from dotenv import load_dotenv
 from flask_script import Manager, Server
+from flask_migrate import Migrate, MigrateCommand
 
 from config import config
 from form_elements import elements
+from user import db
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -25,17 +26,19 @@ slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 # Flask web server for incoming traffic from Slack
 app = Flask(__name__)
+db.init_app(app)
 
 # Define configuration settings for Hini app
 app.config.from_object(config[FLASK_ENV])
+print(app.config);
+print(FLASK_ENV, config[FLASK_ENV])
 
 # Instantiate the Manager from Flask Script
 manager = Manager(app)
-manager.add_command('runserver', Server())
+migrate = Migrate(app, db)
 
-# Dictionary to store coffee orders. In the real world, you'd want an actual
-# key-value store
-COFFEE_ORDERS = {}
+manager.add_command('db', MigrateCommand)
+manager.add_command('runserver', Server())
 
 # Send a message to the user asking if they would like coffee
 user_id = "hinii"
@@ -43,10 +46,10 @@ user_id = "hinii"
 
 @app.route('/', methods=['GET', 'POST', 'OPTIONS'])
 def index():
-    print('checking the index')
-    return make_response('Mohini\'s the greatest', 200)
-
-# https://github.com/zachwill/moment
+    return jsonify({
+        'status': 'success',
+        'message': 'Mohini\'s the greatest'
+    }), 200
 
 
 @app.route("/invite", methods=["POST"])

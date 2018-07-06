@@ -13,15 +13,15 @@ elements = [
         "placeholder": "Enter the description of the event"
     },
     {
-        "label": "Start Date",
-        "type": "text",
-        "name": "start_date",
-        "placeholder": "Please follow the format: DD-MM-YYYY"
-    },
-    {
         "label": "Finish Date",
         "type": "text",
         "name": "finish_date",
+        "placeholder": "Please follow the format: DD-MM-YYYY"
+    },
+    {
+        "label": "Done Date",
+        "type": "text",
+        "name": "fidoh_date",
         "placeholder": "Please follow the format: DD-MM-YYYY"
     }
 ]
