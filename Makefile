@@ -13,3 +13,6 @@ start:
 
 install_deps:
 	pip intall -r requirements.txt
+
+db_prepare:
+	python main.py db migrate && python main.py db upgrade

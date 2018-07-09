@@ -11,7 +11,6 @@ from os.path import join, dirname
 
 from dotenv import load_dotenv
 
-basedir = os.path.abspath(os.path.dirname(__file__))
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
@@ -29,6 +28,10 @@ class BaseConfig:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_BINDS = None
+    GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+    GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
+    OAUTHLIB_INSECURE_TRANSPORT = '0'
+    # SERVER_NAME = os.getenv('SERVER_NAME')
 
 
 class DevelopmentConfig(BaseConfig):
@@ -41,6 +44,7 @@ class DevelopmentConfig(BaseConfig):
 
     ENV = 'development'
     FLASK_ENV = 'development'
+    OAUTHLIB_INSECURE_TRANSPORT = '1'
 
 
 class ProductionConfig(BaseConfig):

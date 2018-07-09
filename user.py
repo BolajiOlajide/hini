@@ -9,17 +9,26 @@ db = SQLAlchemy()
 
 class User(db.Model):
     __tablename__ = 'Users'
+
     __table_args__ = (db.UniqueConstraint(
-        'slack_username', 'slack_uid',
-        name='unique_constraint_slack_id_name'),
+        'slack_uid', 'team_id',
+        name='unique_constraint_slack_id_team'),
     )
 
     id = db.Column(db.Integer(), primary_key=True)
-    slack_username = db.Column(db.String(32), index=True, nullable=False)
-    slack_uid = db.Column(db.String(32), unique=True, index=True,
-                          nullable=False)
-    token = db.Column(db.String(128), unique=True, index=True,
-                      nullable=False)
+    slack_username = db.Column(db.String(32), nullable=False)
+    slack_uid = db.Column(db.String(32), nullable=False)
+    google_token = db.Column(db.String(128), unique=True, index=True,
+                             nullable=True)
+    email = db.Column(db.String(64), nullable=False)
+    tz = db.Column(db.String(64), nullable=False)
+    first_name = db.Column(db.String(64), nullable=True)
+    last_name = db.Column(db.String(64), nullable=True)
+    team_id = db.Column(db.String(32), nullable=False)
+    token_uri = db.Column(db.String(128), unique=True, index=True,
+                          nullable=True)
+    refresh_token = db.Column(db.String(128), nullable=True)
+    state = db.Column(db.String(128), nullable=True)
     created_at = db.Column(
         db.DateTime, default=datetime.now(), nullable=False)
     updated_at = db.Column(

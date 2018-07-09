@@ -25,3 +25,17 @@ elements = [
         "placeholder": "Please follow the format: DD-MM-YYYY"
     }
 ]
+
+link_button_element = [
+    {
+        "fallback":
+            "Upgrade your Slack client to use messages like these.",
+        "color": "#E8E8E8",
+        "actions": [
+            {
+                "type": "button",
+                "text": "Authorize Hini"
+            }
+        ]
+    }
+]

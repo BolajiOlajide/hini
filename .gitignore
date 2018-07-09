@@ -12,3 +12,8 @@ dist
 
 .tox
 .coverage
+
+# Google Oauth Credentials
+credentials.json
+calendar.dat
+client_secrets.json
