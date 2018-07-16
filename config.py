@@ -31,7 +31,6 @@ class BaseConfig:
     GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
     OAUTHLIB_INSECURE_TRANSPORT = '0'
-    # SERVER_NAME = os.getenv('SERVER_NAME')
 
 
 class DevelopmentConfig(BaseConfig):

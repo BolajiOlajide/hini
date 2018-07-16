@@ -18,15 +18,13 @@ class User(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     slack_username = db.Column(db.String(32), nullable=False)
     slack_uid = db.Column(db.String(32), nullable=False)
-    google_token = db.Column(db.String(128), unique=True, index=True,
+    google_token = db.Column(db.String(512), unique=True, index=True,
                              nullable=True)
     email = db.Column(db.String(64), nullable=False)
     tz = db.Column(db.String(64), nullable=False)
     first_name = db.Column(db.String(64), nullable=True)
     last_name = db.Column(db.String(64), nullable=True)
     team_id = db.Column(db.String(32), nullable=False)
-    token_uri = db.Column(db.String(128), unique=True, index=True,
-                          nullable=True)
     refresh_token = db.Column(db.String(128), nullable=True)
     state = db.Column(db.String(128), nullable=True)
     created_at = db.Column(

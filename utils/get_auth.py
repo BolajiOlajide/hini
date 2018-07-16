@@ -1,11 +1,11 @@
-import google_auth_oauthlib.flow
+from google_auth_oauthlib.flow import Flow
 
 
 def get_authorization_credentials(google_credentials, email=''):
     # Use the client_secret.json file to identify the application requesting
     # authorization. The client ID (from that file)
     # and access scopes are required.
-    flow = google_auth_oauthlib.flow.Flow.from_client_config(
+    flow = Flow.from_client_config(
         google_credentials,
         scopes=['https://www.googleapis.com/auth/calendar'])
 

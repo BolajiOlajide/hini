@@ -22,12 +22,12 @@ def credentials_to_dict(credentials):
     }
 
 
-def credentials_from_user(user_object, scopes):
+def credentials_from_user(user_object,):
     return {
-        'token': user_object.token,
+        'token': user_object.google_token,
         'refresh_token': user_object.refresh_token,
-        'token_uri': user_object.token_uri,
+        'token_uri': "https://accounts.google.com/o/oauth2/token",
         'client_id': GOOGLE_CLIENT_ID,
         'client_secret': GOOGLE_CLIENT_SECRET,
-        'scopes': scopes
+        'scopes': "https://www.googleapis.com/auth/calendar"
     }
