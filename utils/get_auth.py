@@ -22,6 +22,7 @@ def get_authorization_credentials(google_credentials, email=''):
         # for web server apps.
         access_type='offline',
         login_hint=email,
+        prompt='consent',
         # Enable incremental authorization. Recommended as a best practice.
         include_granted_scopes='true'
     )

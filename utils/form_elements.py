@@ -13,16 +13,45 @@ elements = [
         "placeholder": "Enter the description of the event"
     },
     {
-        "label": "Finish Date",
+        "label": "Start Time",
         "type": "text",
-        "name": "finish_date",
-        "placeholder": "Please follow the format: DD-MM-YYYY"
+        "name": "start_time",
+        "placeholder": "Example: 10PM 12th of July 2018"
     },
     {
-        "label": "Done Date",
-        "type": "text",
-        "name": "fidoh_date",
-        "placeholder": "Please follow the format: DD-MM-YYYY"
+        "label": "Duration",
+        "type": "select",
+        "name": "duration",
+        "options": [
+            {
+                "label": "15 minutes",
+                "value": 15
+            },
+            {
+                "label": "30 minutes",
+                "value": 30
+            },
+            {
+                "label": "1 hour",
+                "value": 60
+            },
+            {
+                "label": "1 hour 30 minutes",
+                "value": 90
+            },
+            {
+                "label": "2 hours",
+                "value": 120
+            },
+            {
+                "label": "2 hours 30 minutes",
+                "value": 150
+            },
+            {
+                "label": "3 hours",
+                "value": 180
+            }
+        ]
     }
 ]
 
