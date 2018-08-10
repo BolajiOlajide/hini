@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <title>Hini | Error</title>
+        <link href="https://fonts.googleapis.com/css?family=Do+Hyeon" rel="stylesheet" />
+        <style>
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100vw;
+                height: 100vh;
+                background: #000;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                color: #FFF;
+                font-family: 'Do Hyeon', sans-serif;
+            }
+            .error {
+                color: red;
+                display: block;
+            }
+            .error-number {
+                font-size: 30rem;
+            }
+            .zero {
+                animation: colorChange 1s infinite alternate;
+                animation-delay: 1s;
+            }
+            @keyframes colorChange {
+                from {
+                    color: red;
+                }
+                to {
+                    color: #E8E8E8;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="error">
+            <span class="error-number">4</span>
+            <span class="error-number zero">0</span>
+            <span class="error-number">4</span>
+        </div>
+    </body>
+</html>

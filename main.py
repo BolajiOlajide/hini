@@ -3,7 +3,7 @@ import json
 
 from flask import (
     Flask, request, make_response,
-    jsonify, url_for
+    jsonify, url_for, render_template
 )
 from slackclient import SlackClient
 from dotenv import load_dotenv
@@ -58,10 +58,11 @@ user_id = "hinii"
 
 @app.route('/', methods=['GET', 'POST', 'OPTIONS'])
 def index():
-    return jsonify({
-        'status': 'success',
-        'message': 'Mohini\'s the greatest'
-    }), 200
+    # return jsonify({
+    #     'status': 'success',
+    #     'message': 'Mohini\'s the greatest'
+    # }), 200
+    return render_template('index.html')
 
 
 @app.route("/invite", methods=["POST"])
@@ -109,7 +110,7 @@ def message_actions():
                                         google_credentials, email)
             link_button_element[0]['actions'][0]['url'] = authorization_url
             send_message(
-                "First time user, please connect Hini to your Google Calendar",
+                "First time user, please authorize Hini with your google account",
                 slack_client,
                 slack_uid,
                 link_button_element
@@ -199,12 +200,12 @@ def authorize():
         state = request.args.get('state')
 
         if not (scope and code and state):
-            return make_response('Invalid Parameters', 400)
+            return render_template('error.html')
 
         user = User.query.filter_by(state=state).first()
 
         if not user:
-            return make_response('Invalid parameters', 400)
+            return render_template('error.html')
 
         flow = Flow.from_client_config(
                 google_credentials, scopes=scope, state=state)
@@ -227,9 +228,14 @@ def authorize():
             slack_client,
             user.slack_uid
         )
-        return make_response('User successfully authenticated!', 400)
+        return render_template('success.html')
     except:  # noqa: #722
-        return make_response('Error', 400)
+        return render_template('error.html')
+
+
+@app.route('/addslack')
+def add_slack():
+    return make_response('Slack added', 200)
 
 
 if __name__ == "__main__":
