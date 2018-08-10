@@ -19,11 +19,11 @@ from utils.form_elements import elements, link_button_element
 from model import db, User
 from utils.get_auth import get_authorization_credentials
 from credentials import google_credentials
-from utils.custom_ops import send_message, get_users_email
+from utils.custom_ops import send_message, get_users_email, get_or_create_user
 from utils.get_credentials import credentials_to_dict, credentials_from_user
 from utils.dict_formatter import dict_to_binary
 from utils.event_format import event_format
-from utils.custom_date import add_minutes
+from utils.custom_date import add_minutes, normalize_date
 
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
@@ -66,115 +66,129 @@ def index():
 
 @app.route("/invite", methods=["POST"])
 def message_actions():
-    user_id = request.form.get('user_id')
+    try:
+        user_id = request.form.get('user_id')
 
-    if not user_id:
-        payload = json.loads(request.form['payload'])
-        user_id = payload.get('user').get('id')
+        if not user_id:
+            payload = json.loads(request.form['payload'])
+            user_id = payload.get('user').get('id')
 
-    # Get current user's information
-    user_response = slack_client.api_call(
-        "users.info",
-        user=user_id
-    )
-
-    if not user_response.get('ok'):
-        return make_response('Error getting user profile.', 400)
-
-    user_info = user_response.get('user')
-
-    slack_username = user_info.get('profile').get('display_name', '')
-    tz = user_info.get('tz', '')
-    email = user_info.get('profile').get('email', '')
-    first_name = user_info.get('profile').get('first_name', '')
-    last_name = user_info.get('profile').get('last_name', '')
-    slack_uid = user_info.get('id')
-    team_id = user_info.get('profile').get('team')
-
-    user = User.query.filter_by(
-        slack_uid=slack_uid,
-        team_id=team_id
-    ).first()
-
-    if not user:
-        user = User(
-            slack_username=slack_username,
-            slack_uid=slack_uid,
-            email=email,
-            tz=tz,
-            first_name=first_name,
-            last_name=last_name,
-            team_id=team_id
+        # Get current user's information
+        user_response = slack_client.api_call(
+            "users.info",
+            user=user_id
         )
-        user.save()
 
-    if not user.google_token:
-        authorization_url, state = get_authorization_credentials(
-                                    google_credentials, email)
-        link_button_element[0]['actions'][0]['url'] = authorization_url
-        send_message(
-            "First time user, please connect Hini to your Google Calendar",
-            slack_client,
-            slack_uid,
-            link_button_element
-        )
-        user.state = state
-        user.save()
-        return make_response('', 200)
+        if not user_response.get('ok'):
+            return make_response('Error getting user profile.', 400)
 
-    if ('payload' not in request.form.keys()):
-        trigger_id = request.form['trigger_id']
-        slack_client.api_call(
-            "dialog.open",
-            trigger_id=trigger_id,
-            dialog={
-                "title": "Create an event",
-                "submit_label": "Create",
-                "callback_id": user_id + "calender_invite",
-                "notify_on_cancel": True,
-                "elements": elements
-            }
-        )
-    else:
-        payload = json.loads(request.form['payload'])
-        channel_id = payload.get('channel').get('id')
-        ok, is_channel, emails = get_users_email(channel_id, slack_client)
-        if not ok:
+        user_info = user_response.get('user')
+
+        slack_username = user_info.get('profile').get('display_name', '')
+        tz = user_info.get('tz', '')
+        email = user_info.get('profile').get('email', '')
+        first_name = user_info.get('profile').get('first_name', '')
+        last_name = user_info.get('profile').get('last_name', '')
+        slack_uid = user_info.get('id')
+        team_id = user_info.get('profile').get('team')
+
+        user_object = {
+            'slack_username': slack_username,
+            'slack_uid': slack_uid,
+            'email': email,
+            'tz': tz,
+            'first_name': first_name,
+            'last_name': last_name,
+            'team_id': team_id
+        }
+
+        user = get_or_create_user(User, user_object)
+
+        if not user.google_token:
+            authorization_url, state = get_authorization_credentials(
+                                        google_credentials, email)
+            link_button_element[0]['actions'][0]['url'] = authorization_url
             send_message(
-                'Error retrieving channel info!',
+                "First time user, please connect Hini to your Google Calendar",
                 slack_client,
                 slack_uid,
+                link_button_element
             )
-        if not is_channel:
-            send_message(
-                'Can only use Hini in a channel for now.',
-                slack_client,
-                slack_uid,
-            )
-        if not payload.get('submission'):
+            user.state = state
+            user.save()
             return make_response('', 200)
-        credentials = Credentials(**credentials_from_user(user))
 
-        calendar = build('calendar', 'v3', credentials=credentials)
+        if ('payload' not in request.form.keys()):
+            trigger_id = request.form['trigger_id']
+            slack_client.api_call(
+                "dialog.open",
+                trigger_id=trigger_id,
+                dialog={
+                    "title": "Create an event",
+                    "submit_label": "Create",
+                    "callback_id": user_id + "calender_invite",
+                    "notify_on_cancel": True,
+                    "elements": elements
+                }
+            )
+        else:
+            payload = json.loads(request.form['payload'])
+            channel_id = payload.get('channel').get('id')
+            team_id = payload.get('team').get('id')
+            ok, is_channel, emails = get_users_email(channel_id, slack_client, User, team_id)
+            if not ok:
+                send_message(
+                    'Error retrieving channel info!',
+                    slack_client,
+                    slack_uid,
+                )
+            if not is_channel:
+                send_message(
+                    'Can only use Hini in a channel for now.',
+                    slack_client,
+                    slack_uid,
+                )
+            if not payload.get('submission'):
+                return make_response('', 200)
+            credentials = Credentials(**credentials_from_user(user))
 
-        event_name = payload.get('submission').get('event_name')
-        event_description = payload.get('submission').get('event_description')
-        start_time = parse(payload.get('submission').get('start_time'))
-        duration = payload.get('submission').get('duration')
-        end_time = add_minutes(start_time, duration)
-        print(emails)
-        event_body = event_format(
-            event_name,
-            event_description,
-            tz,
-            start_time,
-            end_time,
-            emails
-        )
-        event = calendar.events().insert(calendarId='primary', body=event_body).execute()
-        print('Event created: %s' % (event.get('htmlLink')))
-        return make_response('EVENT CREATED: {}'.format(event.get('htmlLink')), 200)
-    return make_response('Working...', 200)
+            calendar = build('calendar', 'v3', credentials=credentials)
+
+            timezone = user.tz or '+0100'
+
+            event_name = payload.get('submission').get('event_name')
+            event_description = payload.get('submission').get('event_description')
+            start_time = parse(
+                payload.get('submission').get('start_time'),
+                settings={
+                    'TIMEZONE': timezone,
+                    'RETURN_AS_TIMEZONE_AWARE': True
+                }
+            )
+            duration = payload.get('submission').get('duration')
+            end_time = add_minutes(start_time, duration)
+
+            event_body = event_format(
+                event_name,
+                event_description,
+                tz,
+                normalize_date(start_time),
+                normalize_date(end_time),
+                emails
+            )
+            event = calendar.events().insert(
+                calendarId='primary', body=event_body
+            ).execute()
+            send_message(
+                'EVENT CREATED: {}'
+                .format(event.get('htmlLink')),
+                slack_client,
+                slack_uid,
+            )
+            return make_response('', 200)
+        return make_response('', 200)
+    except:
+        return make_response('Error while processing your request!', 200)
 
 
 @app.route('/authorize')
@@ -198,7 +212,8 @@ def authorize():
         flow.redirect_uri = url_for(
             'authorize', _external=True)
 
-        # Use the authorization server's response to fetch the OAuth 2.0 tokens.
+        # Use the authorization server's response to
+        # fetch the OAuth 2.0 tokens.
         authorization_response = request.url
         flow.fetch_token(authorization_response=authorization_response)
 
@@ -213,7 +228,7 @@ def authorize():
             user.slack_uid
         )
         return make_response('User successfully authenticated!', 400)
-    except:
+    except:  # noqa: #722
         return make_response('Error', 400)
 
 
