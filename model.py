@@ -75,3 +75,59 @@ class User(db.Model):
         """
         return '<Slack Handle: {} - {}>'.format(self.slack_username,
                                                 self.slack_uid)
+
+
+class Team(db.Model):
+    __tablename__ = 'Teams'
+
+    id = db.Column(db.Integer(), primary_key=True)
+    code = db.Column(db.String(512), nullable=False)
+    team_name = db.Column(db.String(128), nullable=True)
+    team_id = db.Column(db.String(128), nullable=False)
+    bot_token = db.Column(db.String(128), nullable=False)
+    user_token = db.Column(db.String(128), nullable=False)
+    created_at = db.Column(
+        db.DateTime, default=datetime.now(), nullable=False)
+    updated_at = db.Column(
+        db.DateTime, default=datetime.now(),
+        onupdate=datetime.now(), nullable=False)
+
+    def to_json(self):
+        """
+        Display the object properties as a json object.
+
+        Mold up all the properties of BucketList object into
+        an object for display.
+        """
+        return {
+            'id': self.id
+        }
+
+    def save(self):
+        """
+        Save to database.
+
+        Save instance of the object to database and commit.
+        """
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except (exc.IntegrityError, exc.InvalidRequestError):
+            db.session().rollback()
+
+    def delete(self):
+        """
+        Delete from database.
+
+        Deletes instance of an object from database
+        """
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        """
+        Display the object.
+
+        Displays the string representation of the BucketList object.
+        """
+        return '<Team ID: {}>'.format(self.id)

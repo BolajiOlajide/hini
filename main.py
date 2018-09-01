@@ -1,6 +1,8 @@
+# Standard library imports
 import os
 import json
 
+# Related third party imports.
 from flask import (
     Flask, request, make_response,
     jsonify, url_for, render_template
@@ -14,12 +16,13 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from dateparser import parse
 
+# Local application imports.
 from config import config
 from utils.form_elements import elements, link_button_element
-from model import db, User
+from model import db, User, Team
 from utils.get_auth import get_authorization_credentials
 from credentials import google_credentials
-from utils.custom_ops import send_message, get_users_email, get_or_create_user
+from utils.custom_ops import send_message, get_users_email, get_or_create_user, get_bot_token
 from utils.get_credentials import credentials_to_dict, credentials_from_user
 from utils.dict_formatter import dict_to_binary
 from utils.event_format import event_format
@@ -31,12 +34,9 @@ load_dotenv(dotenv_path)
 
 # Your app's Slack bot user token
 SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN')
-SLACK_VERIFICATION_TOKEN = os.getenv('SLACK_VERIFICATION_TOKEN')
+SLACK_CLIENT_ID = os.getenv('SLACK_CLIENT_ID')
+SLACK_CLIENT_SECRET = os.getenv('SLACK_CLIENT_SECRET')
 FLASK_ENV = os.getenv('FLASK_ENV') or 'development'
-QUOTE_BASE_URL = os.getenv('QUOTE_BASE_URL')
-
-# Slack client for Web API requests
-slack_client = SlackClient(SLACK_BOT_TOKEN)
 
 # Flask web server for incoming traffic from Slack
 app = Flask(__name__)
@@ -52,22 +52,29 @@ migrate = Migrate(app, db)
 manager.add_command('db', MigrateCommand)
 manager.add_command('runserver', Server())
 
-# Send a message to the user asking if they would like coffee
-user_id = "hinii"
-
 
 @app.route('/', methods=['GET', 'POST', 'OPTIONS'])
 def index():
-    # return jsonify({
-    #     'status': 'success',
-    #     'message': 'Mohini\'s the greatest'
-    # }), 200
     return render_template('index.html')
+
+
+@app.route('/mohini', methods=['GET', 'POST', 'OPTIONS'])
+def mohini():
+    return make_response('Mohini', 200)
 
 
 @app.route("/invite", methods=["POST"])
 def message_actions():
     try:
+        _team_id = request.form.get('team_id', None)
+        if not _team_id:
+            _payload = json.loads(request.form.get('payload'))
+            _team_id = _payload.get('team').get('id')
+        bot_token = get_bot_token(_team_id, Team)
+
+        # Slack client for Web API requests
+        slack_client = SlackClient(bot_token)
+
         user_id = request.form.get('user_id')
 
         if not user_id:
@@ -186,9 +193,8 @@ def message_actions():
                 slack_client,
                 slack_uid,
             )
-            return make_response('', 200)
-        return make_response('', 200)
-    except:
+        return make_response("", 200)
+    except:  # noqa: #722
         return make_response('Error while processing your request!', 200)
 
 
@@ -206,6 +212,12 @@ def authorize():
 
         if not user:
             return render_template('error.html')
+
+        team_id = user.team_id
+        bot_token = get_bot_token(team_id, Team)
+
+        # Slack client for Web API requests
+        slack_client = SlackClient(bot_token)
 
         flow = Flow.from_client_config(
                 google_credentials, scopes=scope, state=state)
@@ -235,7 +247,36 @@ def authorize():
 
 @app.route('/addslack')
 def add_slack():
-    return make_response('Slack added', 200)
+    try:
+        code = request.args.get('code')
+        state = request.args.get('state')
+
+        # An empty string is a valid token for this request
+        temp_sc = SlackClient("")
+
+        # Request the auth tokens from Slack
+        auth_response = temp_sc.api_call(
+            "oauth.access",
+            client_id=SLACK_CLIENT_ID,
+            client_secret=SLACK_CLIENT_SECRET,
+            code=code
+        )
+
+        user_token = auth_response['access_token']
+        bot_token = auth_response['bot']['bot_access_token']
+        team_id = auth_response['team_id']
+        team_name = auth_response['team_name']
+        team = Team(
+            code=code,
+            bot_token=bot_token,
+            user_token=user_token,
+            team_name=team_name,
+            team_id=team_id
+        )
+        team.save()
+        return render_template('add_successful.html')
+    except:  # noqa: #722
+        return render_template('error.html')
 
 
 if __name__ == "__main__":

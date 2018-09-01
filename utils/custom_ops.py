@@ -8,6 +8,14 @@ def send_message(text, slack_client, channel, attachment=None):
     )
 
 
+def get_bot_token(team_id, TeamModel):
+    team_info = TeamModel.query.filter_by(
+            team_id=team_id
+        ).first()
+    bot_token = team_info.bot_token
+    return bot_token
+
+
 def get_channel_info(channel_id, slack_client):
     return slack_client.api_call(
         "channels.info",
@@ -25,7 +33,7 @@ def get_user_info(user_id, slack_client):
         if not user_response.get('ok'):
             return None
         return user_response.get('user')
-    except:
+    except:  # noqa: #722
         return None
 
 
