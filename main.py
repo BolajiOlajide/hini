@@ -1,11 +1,12 @@
 # Standard library imports
 import os
 import json
+from logging import getLogger
 
 # Related third party imports.
 from flask import (
     Flask, request, make_response,
-    jsonify, url_for, render_template
+    url_for, render_template
 )
 from slackclient import SlackClient
 from dotenv import load_dotenv
@@ -15,6 +16,7 @@ from google_auth_oauthlib.flow import Flow
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from dateparser import parse
+from timber import TimberHandler
 
 # Local application imports.
 from config import config
@@ -24,7 +26,6 @@ from utils.get_auth import get_authorization_credentials
 from credentials import google_credentials
 from utils.custom_ops import send_message, get_users_email, get_or_create_user, get_bot_token
 from utils.get_credentials import credentials_to_dict, credentials_from_user
-from utils.dict_formatter import dict_to_binary
 from utils.event_format import event_format
 from utils.custom_date import add_minutes, normalize_date
 
@@ -32,11 +33,19 @@ from utils.custom_date import add_minutes, normalize_date
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+# Timber API KEY
+TIMBER_API_KEY = os.getenv('TIMBER_API_KEY')
 # Your app's Slack bot user token
 SLACK_BOT_TOKEN = os.getenv('SLACK_BOT_TOKEN')
 SLACK_CLIENT_ID = os.getenv('SLACK_CLIENT_ID')
 SLACK_CLIENT_SECRET = os.getenv('SLACK_CLIENT_SECRET')
 FLASK_ENV = os.getenv('FLASK_ENV') or 'development'
+
+logger = getLogger("hini")
+import pdb; pdb.set_trace()
+timberhandler = TimberHandler(apikey=TIMBER_API_KEY)
+logger.addHandler(timberhandler)
+logger('starting application')
 
 # Flask web server for incoming traffic from Slack
 app = Flask(__name__)
