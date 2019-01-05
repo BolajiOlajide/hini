@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+
+[packages]
+"urllib3" = "*"
+flask = "*"
+dateparser = "*"
+"flake8" = "*"
+flask-migrate = "*"
+flask-script = "*"
+flask-sqlalchemy = "*"
+google-api-python-client = "*"
+google-auth = "*"
+"google-auth-httplib2" = "*"
+google-auth-oauthlib = "*"
+gunicorn = "*"
+moment = "*"
+"psycopg2" = "*"
+"psycopg2-binary" = "*"
+oauthlib = "*"
+"oauth2client" = "*"
+python-dateutil = "*"
+python-dotenv = "*"
+slackclient = "*"
+
+[requires]
+python_version = "3.6"
