@@ -104,6 +104,8 @@ def get_users_email(channel_id, slack_client, User, team_id):
     is_channel = channel_info.get('channel').get('is_channel')
     members = channel_info.get('channel').get('members', [])
     members_email = [
-        get_user_email(User, user_id, team_id, slack_client) for user_id in members
+        get_user_email(
+            User, user_id, team_id, slack_client
+        ) for user_id in members
     ]
     return ok, is_channel, clean_email_list(members_email)

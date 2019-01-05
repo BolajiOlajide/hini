@@ -18,7 +18,7 @@ class BackgroundTaskWorker:
     """
 
     @classmethod
-    def start_work(cls, asyn_function, args):
+    def start_work(cls, async_function, args):
         """This function helps to run an unpredictable function in the background.
 
         it uses an event loop as central executor.
@@ -30,10 +30,10 @@ class BackgroundTaskWorker:
         """
         event_loop = asyncio.new_event_loop()
         asyncio.set_event_loop(event_loop)
-        event_loop.run_in_executor(None, cls.run_task, asyn_function, args)
+        event_loop.run_in_executor(None, cls.run_task, async_function, args)
 
     @classmethod
-    def run_task(cls, asyn_function, args):
+    def run_task(cls, async_function, args):
         """This function creates a future task which runs in background
         until completion
 
@@ -44,7 +44,7 @@ class BackgroundTaskWorker:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-        task = asyncio.ensure_future(asyn_function(*args))
+        task = asyncio.ensure_future(async_function(*args))
 
         loop.run_until_complete(task)
         loop.close()
