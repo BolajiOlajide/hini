@@ -66,12 +66,16 @@ def index():
 
 @app.route('/mohini', methods=['GET', 'POST', 'OPTIONS'])
 def mohini():
-    return make_response('Mohini', 200)
+    return make_response('😃', 200)
 
 
 @app.route("/invite", methods=["POST"])
 def message_actions():
     try:
+        if (request.form.get('text', '') == 'help'):
+            msg = ':smile: Use the /hini command to get started. ❤️'
+            return make_response(msg, 200)
+
         _team_id = request.form.get('team_id', None)
         if not _team_id:
             _payload = json.loads(request.form.get('payload'))
@@ -197,7 +201,7 @@ def message_actions():
             BackgroundTaskWorker.start_work(create_event, event_args)
         return make_response("Your calendar invite is being processed.", 200)
     except:  # noqa: #722
-        return make_response('Error while processing your request!', 200)
+        return make_response('Error while processing your request!', 500)
 
 
 @app.route('/authorize')
@@ -281,8 +285,14 @@ def add_slack():
         return render_template('error.html')
 
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    return False
+
+
 if __name__ == "__main__":
     try:
         manager.run()
     except SystemError:
-        print('Check the system. Something is wrong 😢')
+        print('Check the server. Something is wrong 😢')
