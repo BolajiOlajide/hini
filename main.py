@@ -288,7 +288,7 @@ def add_slack():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    return False
+    return render_template('error.html')
 
 
 if __name__ == "__main__":

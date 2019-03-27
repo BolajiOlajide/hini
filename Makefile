@@ -9,7 +9,7 @@ start_dev:
 	export FLASK_ENV=development && export OAUTHLIB_INSECURE_TRANSPORT=1 && python main.py runserver
 
 start:
-	gunicorn -w 2 -b 0.0.0.0 main:app
+	gunicorn -b 0.0.0.0 main:app
 
 install_deps:
 	pip intall -r requirements.txt
